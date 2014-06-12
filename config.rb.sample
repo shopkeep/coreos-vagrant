@@ -16,14 +16,28 @@
 # VirtualBox, so should only be used in debugging situations
 #$enable_serial_logging=false
 
-# Enable port forwarding of Docker TCP socket
-# Set to the TCP port you want exposed on the *host* machine, default is 4243
-# If 4243 is used, Vagrant will auto-increment (e.g. in the case of $num_instances > 1)
-# You can then use the docker tool locally by setting the following env var:
-#   export DOCKER_HOST='tcp://127.0.0.1:4243'
-#$expose_docker_tcp=4243
+# Enable port forwarding of TCP sockets
+# Set the TCP port you want exposed on the *host* machine
+# If you specify 'true' as the 3rd argument, Vagrant will auto-increment (e.g. in the case of $num_instances > 1)
+# This is useful for forwarding ports like Docker (4243) or etcd (4001) from your local
+#   machine to the Vagrant machine and then used with DOCKER_HOST='tcp://127.0.0.1:4243'
+# $forwarded_ports = [
+# 	ForwardPort.new(4243, 4243, true), # Docker
+# 	ForwardPort.new(4001, 4001, true)  # etcd
+# ]
 
 # Setting for VirtualBox VMs
 #$vb_gui = false
 #$vb_memory = 1024
 #$vb_cpus = 1
+
+# Configure your Docker based projects that you want to have built on this box
+# This allows the images to be built and available on the machine so that you can use
+#   fleet can deploy like you would in production
+# my_project = Project.new("/home/me/my-projects", "/home/core/share/my-project")
+# my_project.build_image('great-rails-app', 'my-great-rails-app')
+# my_project.build_image('great-rails-app-migrations', 'my-great-rails-app/db')
+#
+# $projects = [
+# 	my_project
+# ]

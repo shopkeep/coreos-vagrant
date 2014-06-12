@@ -13,6 +13,8 @@ $enable_serial_logging = false
 $vb_gui = false
 $vb_memory = 1024
 $vb_cpus = 1
+$forwarded_ports = []
+$projects = []
 
 # Attempt to apply the deprecated environment variable NUM_INSTANCES to
 # $num_instances while allowing config.rb to override it
@@ -69,8 +71,8 @@ Vagrant.configure("2") do |config|
         end
       end
 
-      if $expose_docker_tcp
-        config.vm.network "forwarded_port", guest: 4243, host: ($expose_docker_tcp + i - 1), auto_correct: true
+      $forwarded_ports.each do |port|
+        config.vm.network "forwarded_port", host: port.host(i-1), guest: port.guest
       end
 
       config.vm.provider :vmware_fusion do |vb|
@@ -86,12 +88,19 @@ Vagrant.configure("2") do |config|
       ip = "172.17.8.#{i+100}"
       config.vm.network :private_network, ip: ip
 
-      # Uncomment below to enable NFS for sharing the host machine into the coreos-vagrant VM.
-      #config.vm.synced_folder ".", "/home/core/share", id: "core", :nfs => true, :mount_options => ['nolock,vers=3,udp']
-
       if File.exist?(CLOUD_CONFIG_PATH)
-        config.vm.provision :file, :source => "#{CLOUD_CONFIG_PATH}", :destination => "/tmp/vagrantfile-user-data"
-        config.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
+        config.vm.provision :file, source: "#{CLOUD_CONFIG_PATH}", destination: "/tmp/vagrantfile-user-data"
+        config.vm.provision :shell, inline: "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", privileged: true
+      end
+
+      $projects.each do |project|
+        config.vm.synced_folder project.host_path, project.guest_path, id: "core", nfs: true, mount_options: ['nolock,vers=3,udp']
+
+        config.vm.provision "docker", run: "always" do |d|
+          project.images.each do |name, path|
+            d.build_image File.join(project.guest_path, path), args: "--tag #{name}:dev"
+          end
+        end
       end
 
     end
