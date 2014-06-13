@@ -1,3 +1,7 @@
+# require_relative 'lib/incremental_port_forward'
+# require_relative 'lib/port_forward'
+# require_relative 'lib/project'
+
 # coreos-vagrant is configured through a series of configuration
 # options (global ruby variables) which are detailed below. To modify
 # these options, first copy this file to "config.rb". Then simply
@@ -22,8 +26,8 @@
 # This is useful for forwarding ports like Docker (4243) or etcd (4001) from your local
 #   machine to the Vagrant machine and then used with DOCKER_HOST='tcp://127.0.0.1:4243'
 # $forwarded_ports = [
-# 	ForwardPort.new(4243, 4243, true), # Docker
-# 	ForwardPort.new(4001, 4001, true)  # etcd
+# 	IncrementalPortForward.new(4243, 4243), # Docker
+# 	IncrementalPortForward.new(4001, 4001)  # etcd
 # ]
 
 # Setting for VirtualBox VMs

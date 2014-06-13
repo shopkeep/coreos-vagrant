@@ -72,7 +72,7 @@ Vagrant.configure("2") do |config|
       end
 
       $forwarded_ports.each do |port|
-        config.vm.network "forwarded_port", host: port.host(i-1), guest: port.guest
+        config.vm.network "forwarded_port", host: port.host, guest: port.guest
       end
 
       config.vm.provider :vmware_fusion do |vb|
